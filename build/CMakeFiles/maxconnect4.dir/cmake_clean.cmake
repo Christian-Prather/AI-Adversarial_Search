@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/maxconnect4.dir/max_connect_4.cpp.o"
-  "maxconnect4.pdb"
   "maxconnect4"
+  "maxconnect4.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

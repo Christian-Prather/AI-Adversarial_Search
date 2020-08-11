@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/christian/Documents/AI-Adversarial_Search/max_connect_4.cpp
+/home/christian/Documents/AI/AI-Adversarial_Search/max_connect_4.cpp
 stdio.h
 -
 math.h

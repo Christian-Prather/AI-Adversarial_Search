@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/christian/Documents/AI-Adversarial_Search/build",
-  "command": "/bin/g++-9   -I/home/christian/Documents/AI-Adversarial_Search/SFML_INCLUDE_DIR -I/home/christian/Documents/AI-Adversarial_Search/include  -g   -std=gnu++14 -o CMakeFiles/maxconnect4.dir/max_connect_4.cpp.o -c /home/christian/Documents/AI-Adversarial_Search/max_connect_4.cpp",
-  "file": "/home/christian/Documents/AI-Adversarial_Search/max_connect_4.cpp"
-}
-]

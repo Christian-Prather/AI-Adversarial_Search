@@ -4,39 +4,29 @@
 
 
 # Configuration directories and files
-SourceDirectory: /home/christian/Documents/AI-Adversarial_Search
-BuildDirectory: /home/christian/Documents/AI-Adversarial_Search/build
+SourceDirectory: /home/christian/Documents/AI/AI-Adversarial_Search
+BuildDirectory: /home/christian/Documents/AI/AI-Adversarial_Search/build
 
 # Where to place the cost data store
 CostDataFile: 
 
 # Site is something like machine.domain, i.e. pragmatic.crd
-Site: christian-laptop
+Site: christian-Blade
 
 # Build name is osname-revision-compiler, i.e. Linux-2.4.2-2smp-c++
-BuildName: Linux-g++-9
+BuildName: Linux-c++
 
 # Subprojects
 LabelsForSubprojects: 
 
 # Submission information
-IsCDash: 
-CDashVersion: 
-QueryCDashVersion: 
-DropSite: 
-DropLocation: 
-DropSiteUser: 
-DropSitePassword: 
-DropSiteMode: 
-DropMethod: http
-TriggerSite: 
-ScpCommand: /usr/bin/scp
+SubmitURL: http://
 
 # Dashboard start time
 NightlyStartTime: 00:00:00 EDT
 
 # Commands for the build/test/submit cycle
-ConfigureCommand: "/usr/bin/cmake" "/home/christian/Documents/AI-Adversarial_Search"
+ConfigureCommand: "/usr/bin/cmake" "/home/christian/Documents/AI/AI-Adversarial_Search"
 MakeCommand: /usr/bin/cmake --build . --config "${CTEST_CONFIGURATION_TYPE}" -- -i
 DefaultCTestConfigurationType: Release
 
@@ -72,8 +62,8 @@ UpdateOptions:
 UpdateType: git
 
 # Compiler info
-Compiler: /bin/g++-9
-CompilerVersion: 9.2.1
+Compiler: /usr/bin/c++
+CompilerVersion: 9.3.0
 
 # Dynamic analysis (MemCheck)
 PurifyCommand: 

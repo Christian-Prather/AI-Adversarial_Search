@@ -12,6 +12,7 @@ using namespace std;
 int maxDepth = 0;
 int currentDepth = 0;
 int AI_PIECE = 0;
+int HUMAN_PIECE = 0;
 
 class gameStatus
 {
@@ -94,7 +95,7 @@ void printGameBoardToFile(gameStatus &currentGame)
 // place that player's piece in the requested column
 int playPiece(int column, gameStatus &currentGame)
 {
-	cout << "PIECE " << currentGame.currentTurn;
+	//cooutputut << "PIECE " << currentGame.currentTurn;
 	// if column full, return 0
 	if (currentGame.gameBoard[0][column] != 0)
 	{
@@ -123,6 +124,8 @@ void undoPiece(int column, gameStatus &currentGame)
 	// 	return 0;
 	// }
 
+	// cout << "Before" << endl;
+	// printGameBoard(currentGame);
 	int i;
 	// starting at the bottom of the board, place the piece into the
 	// first empty spot
@@ -136,90 +139,141 @@ void undoPiece(int column, gameStatus &currentGame)
 		}
 	}
 }
-//AI is maximizing
-int minimax(gameStatus currentGame, bool AI, int depth, int aiPiece)
+
+// If maximize is true its the AI's turn
+int minimax(bool maximize, int depth, int alpha, int beta, gameStatus &currentGame)
 {
-	printGameBoard(currentGame);
-	countScore(currentGame);
-	cout << currentGame.player1Score << " " << currentGame.player2Score << endl;
-	// Base case
-	if (depth == maxDepth)
+	if (depth == 0)
 	{
+		// cout << "Depth 0" << endl;
+		// if (maximize)
+		// {
+		// int maxScore = -INFINITY;
+		// for (int i = 0; i < 7; i++)
+		// {
+		// Play piece then reset
+		// int result = playPiece(i, currentGame);
+		// if (result != 1)
+		// {
+		// 	continue;
+		countScore(currentGame);
+		// printGameBoard(currentGame);
+		// cout << "Score: P1 " << currentGame.player1Score << " P2 " << currentGame.player2Score << endl;
+		// undoPiece(i, currentGame);
+
+		// if (currentGame.player1Score - currentGame.player2Score > maxScore)
+		// {
+		// 	maxScore = currentGame.player1Score;
+		// }
+		// }
 		if (AI_PIECE == 1)
 		{
-			countScore(currentGame);
 			return currentGame.player1Score - currentGame.player2Score;
 		}
 		else
 		{
-			countScore(currentGame);
 			return currentGame.player2Score - currentGame.player1Score;
 		}
-
-		// Player 1 = +1, Player 2 = -1
 	}
-	int maxScore = -INFINITY;
-	int minScore = INFINITY;
-	int minColumn = 0;
-	int maxColumn = 0;
-	for (int column = 0; column < 7; column++)
-	{
-		bool foundOne = false;
-		for (int row = 5; row >= 0; row--)
-		{
-			// Find first open row for current column
-			if (currentGame.gameBoard[row][column] == 0)
-			{
-				foundOne = true;
-				if (AI)
-				{
-					currentGame.gameBoard[row][column] = currentGame.currentTurn;
-					if (currentGame.currentTurn == 1)
-						currentGame.currentTurn = 2;
-					else if (currentGame.currentTurn == 2)
-						currentGame.currentTurn = 1;
-					int score = minimax(currentGame, false, depth + 1, aiPiece);
-					currentGame.gameBoard[row][column] = 0;
-					if (currentGame.currentTurn == 1)
-						currentGame.currentTurn = 2;
-					else if (currentGame.currentTurn == 2)
-						currentGame.currentTurn = 1;
-					maxScore = max(score, maxScore);
-				}
-				// Set spot for human check for AI
-				else
-				{
+	// else
+	// {
+	// 	int minScore = INFINITY;
+	// 	for (int i = 0; i < 7; i++)
+	// 	{
+	// 		// Play piece then reset
+	// 		int result = playPiece(i, currentGame);
+	// 		if (result != 1)
+	// 		{
+	// 			continue;
+	// 		}
+	// 		countScore(currentGame);
+	// 		undoPiece(i, currentGame);
 
-					currentGame.gameBoard[row][column] = currentGame.currentTurn;
-					if (currentGame.currentTurn == 1)
-						currentGame.currentTurn = 2;
-					else if (currentGame.currentTurn == 2)
-						currentGame.currentTurn = 1;
-					int score = minimax(currentGame, true, depth + 1, aiPiece);
-					currentGame.gameBoard[row][column] = 0;
-					if (currentGame.currentTurn == 1)
-						currentGame.currentTurn = 2;
-					else if (currentGame.currentTurn == 2)
-						currentGame.currentTurn = 1;
-					minScore = min(minScore, score);
-					//cout << "SCORE: " << score;
-					//cout << " Checking Human... " << minScore << endl;
-				}
-			}
-			if (foundOne)
+	// 		if (currentGame.player1Score < minScore)
+	// 		{
+	// 			minScore = currentGame.player1Score;
+	// 		}
+	// 	}
+	// 	return minScore;
+	// }
+	// }
+
+	if (maximize)
+	{
+		currentGame.currentTurn = AI_PIECE;
+		int maxScore = -INFINITY;
+		for (int i = 0; i < 7; i++)
+		{
+			// Play piece then reset
+			int result = playPiece(i, currentGame);
+			// cout << "///////////////////////////////////" << endl;
+			// printGameBoard(currentGame);
+
+			// Column not available
+			if (result != 1)
 			{
+				continue;
+			}
+
+			int score = minimax(!maximize, depth - 1, alpha, beta, currentGame);
+			// Fix for when AI is not player 1
+			if (score > maxScore)
+			{
+				maxScore = score;
+			}
+			alpha = max(alpha, score);
+			// cout << "Alpha " << alpha << " Beta " << beta << endl;
+			undoPiece(i, currentGame);
+
+			if (beta <= alpha)
+			{
+				// cout << " B Pruning" << endl;
+
 				break;
 			}
 		}
-	}
-	if (AI)
-	{
-		//cout << "MaxScore: " << maxScore << endl;
 		return maxScore;
 	}
 	else
 	{
-		// cout << "MinScore: " << minScore << endl;
+		if (AI_PIECE == 1)
+		{
+			currentGame.currentTurn = 2;
+		}
+		else
+		{
+			currentGame.currentTurn = 1;
+		}
+
+		int minScore = INFINITY;
+		for (int i = 0; i < 7; i++)
+		{
+			// Play piece then reset
+			int result = playPiece(i, currentGame);
+			// cout << "///////////////////////////////////" << endl;
+			// printGameBoard(currentGame);
+
+			// Column not available
+			if (result != 1)
+			{
+				continue;
+			}
+
+			int score = minimax(!maximize, depth - 1, alpha, beta, currentGame);
+			// Fix for when AI is not player 1
+			if (score < minScore)
+			{
+				minScore = score;
+			}
+			beta = min(beta, score);
+			undoPiece(i, currentGame);
+
+			if (beta <= alpha)
+			{
+				// cout << " B Pruning" << endl;
+				break;
+			}
+		}
 		return minScore;
 	}
 }
@@ -228,65 +282,78 @@ int minimax(gameStatus currentGame, bool AI, int depth, int aiPiece)
 void aiPlay(gameStatus &currentGame)
 {
 	int maxScore = -INFINITY;
-	int selectColumn = 0;
-	AI_PIECE = currentGame.currentTurn;
-	for (int column = 0; column < 7; column++)
+	int column = -1;
+	for (int i = 0; i < 7; i++)
 	{
-		bool foundOne = false;
-		for (int row = 5; row >= 0; row--)
+		cout << "////////////////" << endl;
+		currentGame.currentTurn = AI_PIECE;
+		int result = playPiece(i, currentGame);
+		if (result == 0)
 		{
-			// Find first open row for current column
-			if (currentGame.gameBoard[row][column] == 0)
-			{
-				foundOne = true;
-				currentGame.gameBoard[row][column] = currentGame.currentTurn;
-				cout << "FFFFF" << endl;
-				if (currentGame.currentTurn == 1)
-					currentGame.currentTurn = 2;
-				else if (currentGame.currentTurn == 2)
-					currentGame.currentTurn = 1;
-				int score = minimax(currentGame, false, currentDepth, currentGame.currentTurn);
-				currentGame.gameBoard[row][column] = 0;
-				if (currentGame.currentTurn == 1)
-					currentGame.currentTurn = 2;
-				else if (currentGame.currentTurn == 2)
-					currentGame.currentTurn = 1;
-
-				cout << "FIN COL : " << column << " " << score << endl;
-				if (score > maxScore)
-				{
-					maxScore = score;
-					selectColumn = column;
-				}
-				// 	cout << "COLUMN: ///////////////////////////////// " << column << " MaxScore: " << maxScore << endl;
-			}
-			if (foundOne)
-			{
-				break;
-			}
+			continue;
+		}
+		//cout << "//////////////////////////" << endl;
+		//printGameBoard(currentGame);
+		int score = minimax(false, maxDepth, -INFINITY, INFINITY, currentGame);
+		cout << "Score " << score << endl;
+		undoPiece(i, currentGame);
+		// countScore(currentGame);
+		// Determin which one to check based on which player AI is;
+		// int score = currentGame.player1Score;
+		if (score > maxScore)
+		{
+			maxScore = score;
+			column = i;
 		}
 	}
-	cout << "FINAL MAX SCORE: " << maxScore << "Select Column: " << selectColumn << endl;
 
-	cout << "Prior" << endl;
+	if (column < 0)
+	{
+		cout << "ERROR" << endl;
+		return;
+	}
+	currentGame.currentTurn = AI_PIECE;
 
-	// if (result == 0)
-	// {
-	// 	cout << "Full column" << endl;
-	// 	//aiPlay(currentGame);
-	// }
-
+	int result = playPiece(column, currentGame);
+	// result = playPiece(randColumn, currentGame);
+	if (result == 0)
+	{
+		cout << "ERRRORRRRR" << endl;
+	}
 	// else
 	// {
-	playPiece(selectColumn, currentGame);
-	printGameBoard(currentGame);
 	printf("\n\nmove %li: Player %li, column %li\n",
-		   currentGame.pieceCount, currentGame.currentTurn, selectColumn + 1);
+		   currentGame.pieceCount, currentGame.currentTurn, column + 1);
 	if (currentGame.currentTurn == 1)
 		currentGame.currentTurn = 2;
 	else if (currentGame.currentTurn == 2)
 		currentGame.currentTurn = 1;
 	// }
+}
+
+void humanPlay(gameStatus &currentGame)
+{
+	currentGame.currentTurn = HUMAN_PIECE;
+	cout << "Please make a move... enter column  (1-7)" << endl;
+	int userInput;
+	cin >> userInput;
+	userInput = userInput - 1;
+	while (userInput<0 | userInput> 6)
+	{
+		cout << "Please enter valid option... " << endl;
+		cin >> userInput;
+		userInput = userInput - 1;
+	}
+	int result = playPiece(userInput, currentGame);
+	if (result == 0)
+	{
+		cout << "Column full pick again ..." << endl;
+		humanPlay(currentGame);
+	}
+	if (currentGame.currentTurn == 1)
+		currentGame.currentTurn = 2;
+	else if (currentGame.currentTurn == 2)
+		currentGame.currentTurn = 1;
 }
 
 void countScore(gameStatus &currentGame)
@@ -567,6 +634,19 @@ void countScore(gameStatus &currentGame)
 	}
 }
 
+void saveFile(char *file, gameStatus &currentGame)
+{
+	FILE *output = fopen(file, "w");
+	if (output != 0)
+	{
+		printGameBoardToFile(currentGame);
+		fclose(currentGame.gameFile);
+	}
+	else
+	{
+		printf("error: could not open output file %s\n", output);
+	}
+}
 int main(int argc, char **argv)
 {
 	char **command_line = argv;
@@ -580,24 +660,28 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	gameStatus currentGame; // Declare current game
+
 	char *game_mode = command_line[1];
+	char *output = nullptr;
+	char *nextUp = nullptr;
 
 	if (strcmp(game_mode, "interactive") == 0)
 	{
-		printf("interactive mode is currently not implemented\n");
-		return 0;
+		nextUp = command_line[3];
 	}
-	else if (strcmp(game_mode, "one-move") != 0)
+	else if (strcmp(game_mode, "one-move") == 0)
+	{
+		output = command_line[3];
+	}
+	else
 	{
 		printf("%s is an unrecognized game mode\n", game_mode);
 		return 0;
 	}
-
 	char *input = command_line[2];
-	char *output = command_line[3];
 	maxDepth = atoi(command_line[4]);
 
-	gameStatus currentGame; // Declare current game
 	printf("\nMaxConnect-4 game\n");
 
 	currentGame.gameFile = fopen(input, "r");
@@ -649,8 +733,71 @@ int main(int argc, char **argv)
 
 		return 1;
 	}
+	if (strcmp(game_mode, "one-move") == 0)
+	{
+		cout << "agaseg " << endl;
+		AI_PIECE = currentGame.currentTurn;
+		cout << AI_PIECE << "....." << endl;
+		aiPlay(currentGame);
+	}
+	else if (strcmp(game_mode, "interactive") == 0)
+	{
 
-	aiPlay(currentGame);
+		char nextPlayer = 'N';
+		// Assign correct piece to AI player
+		if (strcmp(nextUp, "computer-next") == 0)
+		{
+
+			// Set AI piece to the piece
+			nextPlayer = 'A';
+			AI_PIECE = currentGame.currentTurn;
+			if (AI_PIECE == 1)
+			{
+				HUMAN_PIECE = 2;
+			}
+			else
+			{
+				HUMAN_PIECE = 1;
+			}
+		}
+		else
+		{
+			nextPlayer = 'H';
+			if (currentGame.currentTurn == 1)
+			{
+				AI_PIECE = 2;
+			}
+			else
+			{
+				AI_PIECE = 1;
+			}
+		}
+
+		while (currentGame.pieceCount != 42)
+		{
+			if (nextPlayer == 'A')
+			{
+				currentGame.currentTurn = AI_PIECE;
+				cout << "AI up" << endl;
+				aiPlay(currentGame);
+				saveFile("computer.txt", currentGame);
+				nextPlayer = 'H';
+			}
+			else if (nextPlayer == 'H')
+			{
+				currentGame.currentTurn = HUMAN_PIECE;
+				humanPlay(currentGame);
+				saveFile("human.txt", currentGame);
+				nextPlayer = 'A';
+			}
+
+			printf("game state after move:\n");
+			printGameBoard(currentGame);
+			countScore(currentGame);
+			printf("Score: Player 1 = %d, Player 2 = %d\n\n", currentGame.player1Score, currentGame.player2Score);
+		}
+	}
+
 	printf("game state after move:\n");
 	printGameBoard(currentGame);
 	countScore(currentGame);
@@ -666,6 +813,5 @@ int main(int argc, char **argv)
 	{
 		printf("error: could not open output file %s\n", output);
 	}
-
 	return 1;
 }
