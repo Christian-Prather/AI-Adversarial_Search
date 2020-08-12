@@ -78,6 +78,7 @@ void printGameBoard(gameStatus &currentGame)
 // Output current game status to file
 void printGameBoardToFile(gameStatus &currentGame)
 {
+
 	int i = 0;
 	int j = 0;
 	for (i = 0; i < 6; i++)
@@ -95,7 +96,6 @@ void printGameBoardToFile(gameStatus &currentGame)
 // place that player's piece in the requested column
 int playPiece(int column, gameStatus &currentGame)
 {
-	//cooutputut << "PIECE " << currentGame.currentTurn;
 	// if column full, return 0
 	if (currentGame.gameBoard[0][column] != 0)
 	{
@@ -119,13 +119,6 @@ int playPiece(int column, gameStatus &currentGame)
 
 void undoPiece(int column, gameStatus &currentGame)
 {
-	// if (currentGame.gameBoard[0][column] != 0)
-	// {
-	// 	return 0;
-	// }
-
-	// cout << "Before" << endl;
-	// printGameBoard(currentGame);
 	int i;
 	// starting at the bottom of the board, place the piece into the
 	// first empty spot
@@ -145,27 +138,9 @@ int minimax(bool maximize, int depth, int alpha, int beta, gameStatus &currentGa
 {
 	if (depth == 0)
 	{
-		// cout << "Depth 0" << endl;
-		// if (maximize)
-		// {
-		// int maxScore = -INFINITY;
-		// for (int i = 0; i < 7; i++)
-		// {
-		// Play piece then reset
-		// int result = playPiece(i, currentGame);
-		// if (result != 1)
-		// {
-		// 	continue;
-		countScore(currentGame);
-		// printGameBoard(currentGame);
-		// cout << "Score: P1 " << currentGame.player1Score << " P2 " << currentGame.player2Score << endl;
-		// undoPiece(i, currentGame);
 
-		// if (currentGame.player1Score - currentGame.player2Score > maxScore)
-		// {
-		// 	maxScore = currentGame.player1Score;
-		// }
-		// }
+		countScore(currentGame);
+
 		if (AI_PIECE == 1)
 		{
 			return currentGame.player1Score - currentGame.player2Score;
@@ -175,28 +150,18 @@ int minimax(bool maximize, int depth, int alpha, int beta, gameStatus &currentGa
 			return currentGame.player2Score - currentGame.player1Score;
 		}
 	}
-	// else
-	// {
-	// 	int minScore = INFINITY;
-	// 	for (int i = 0; i < 7; i++)
-	// 	{
-	// 		// Play piece then reset
-	// 		int result = playPiece(i, currentGame);
-	// 		if (result != 1)
-	// 		{
-	// 			continue;
-	// 		}
-	// 		countScore(currentGame);
-	// 		undoPiece(i, currentGame);
-
-	// 		if (currentGame.player1Score < minScore)
-	// 		{
-	// 			minScore = currentGame.player1Score;
-	// 		}
-	// 	}
-	// 	return minScore;
-	// }
-	// }
+	if (currentGame.pieceCount == 42)
+	{
+		countScore(currentGame);
+		if (AI_PIECE == 1)
+		{
+			return currentGame.player1Score - currentGame.player2Score;
+		}
+		else
+		{
+			return currentGame.player2Score - currentGame.player1Score;
+		}
+	}
 
 	if (maximize)
 	{
@@ -206,8 +171,6 @@ int minimax(bool maximize, int depth, int alpha, int beta, gameStatus &currentGa
 		{
 			// Play piece then reset
 			int result = playPiece(i, currentGame);
-			// cout << "///////////////////////////////////" << endl;
-			// printGameBoard(currentGame);
 
 			// Column not available
 			if (result != 1)
@@ -222,13 +185,10 @@ int minimax(bool maximize, int depth, int alpha, int beta, gameStatus &currentGa
 				maxScore = score;
 			}
 			alpha = max(alpha, score);
-			// cout << "Alpha " << alpha << " Beta " << beta << endl;
 			undoPiece(i, currentGame);
 
 			if (beta <= alpha)
 			{
-				// cout << " B Pruning" << endl;
-
 				break;
 			}
 		}
@@ -250,8 +210,6 @@ int minimax(bool maximize, int depth, int alpha, int beta, gameStatus &currentGa
 		{
 			// Play piece then reset
 			int result = playPiece(i, currentGame);
-			// cout << "///////////////////////////////////" << endl;
-			// printGameBoard(currentGame);
 
 			// Column not available
 			if (result != 1)
@@ -270,7 +228,6 @@ int minimax(bool maximize, int depth, int alpha, int beta, gameStatus &currentGa
 
 			if (beta <= alpha)
 			{
-				// cout << " B Pruning" << endl;
 				break;
 			}
 		}
@@ -292,12 +249,9 @@ void aiPlay(gameStatus &currentGame)
 		{
 			continue;
 		}
-		//cout << "//////////////////////////" << endl;
-		//printGameBoard(currentGame);
 		int score = minimax(false, maxDepth, -INFINITY, INFINITY, currentGame);
 		cout << "Score " << score << endl;
 		undoPiece(i, currentGame);
-		// countScore(currentGame);
 		// Determin which one to check based on which player AI is;
 		// int score = currentGame.player1Score;
 		if (score > maxScore)
@@ -315,20 +269,16 @@ void aiPlay(gameStatus &currentGame)
 	currentGame.currentTurn = AI_PIECE;
 
 	int result = playPiece(column, currentGame);
-	// result = playPiece(randColumn, currentGame);
 	if (result == 0)
 	{
 		cout << "ERRRORRRRR" << endl;
 	}
-	// else
-	// {
 	printf("\n\nmove %li: Player %li, column %li\n",
 		   currentGame.pieceCount, currentGame.currentTurn, column + 1);
 	if (currentGame.currentTurn == 1)
 		currentGame.currentTurn = 2;
 	else if (currentGame.currentTurn == 2)
 		currentGame.currentTurn = 1;
-	// }
 }
 
 void humanPlay(gameStatus &currentGame)
@@ -362,276 +312,151 @@ void countScore(gameStatus &currentGame)
 	currentGame.player2Score = 0;
 
 	//check horizontally
-	int i;
-	for (i = 0; i < 6; i++)
+	// Row
+	int inlineCounter = 0;
+
+	for (int i = 0; i < 6; i++)
 	{
 		//check player 1
-		if (currentGame.gameBoard[i][0] == 1 && currentGame.gameBoard[i][1] == 1 && currentGame.gameBoard[i][2] == 1 && currentGame.gameBoard[i][3] == 1)
+		// Check one row at a time [row][column]
+		inlineCounter = 0;
+		// Column
+		for (int j = 0; j < 7; j++)
 		{
-			currentGame.player1Score++;
+			if (currentGame.gameBoard[i][j] == 1)
+			{
+				inlineCounter++;
+				if (inlineCounter >= 4)
+				{
+					inlineCounter = 0;
+					currentGame.player1Score++;
+					break;
+				}
+			}
+			else
+			{
+				inlineCounter = 0;
+			}
 		}
-		if (currentGame.gameBoard[i][1] == 1 && currentGame.gameBoard[i][2] == 1 && currentGame.gameBoard[i][3] == 1 && currentGame.gameBoard[i][4] == 1)
-		{
-			currentGame.player1Score++;
-		}
-		if (currentGame.gameBoard[i][2] == 1 && currentGame.gameBoard[i][3] == 1 && currentGame.gameBoard[i][4] == 1 && currentGame.gameBoard[i][5] == 1)
-		{
-			currentGame.player1Score++;
-		}
-		if (currentGame.gameBoard[i][3] == 1 && currentGame.gameBoard[i][4] == 1 && currentGame.gameBoard[i][5] == 1 && currentGame.gameBoard[i][6] == 1)
-		{
-			currentGame.player1Score++;
-		}
+
 		//check player 2
-		if (currentGame.gameBoard[i][0] == 2 && currentGame.gameBoard[i][1] == 2 && currentGame.gameBoard[i][2] == 2 && currentGame.gameBoard[i][3] == 2)
+
+		inlineCounter = 0;
+		for (int j = 0; j < 7; j++)
 		{
-			currentGame.player2Score++;
-		}
-		if (currentGame.gameBoard[i][1] == 2 && currentGame.gameBoard[i][2] == 2 && currentGame.gameBoard[i][3] == 2 && currentGame.gameBoard[i][4] == 2)
-		{
-			currentGame.player2Score++;
-		}
-		if (currentGame.gameBoard[i][2] == 2 && currentGame.gameBoard[i][3] == 2 && currentGame.gameBoard[i][4] == 2 && currentGame.gameBoard[i][5] == 2)
-		{
-			currentGame.player2Score++;
-		}
-		if (currentGame.gameBoard[i][3] == 2 && currentGame.gameBoard[i][4] == 2 && currentGame.gameBoard[i][5] == 2 && currentGame.gameBoard[i][6] == 2)
-		{
-			currentGame.player2Score++;
+			if (currentGame.gameBoard[i][j] == 2)
+			{
+				inlineCounter++;
+				if (inlineCounter >= 4)
+				{
+					inlineCounter = 0;
+					currentGame.player2Score++;
+					break;
+				}
+			}
+			else
+			{
+				inlineCounter = 0;
+			}
 		}
 	}
 
-	//check vertically
-	int j;
-	for (j = 0; j < 7; j++)
+	// check vertically
+	for (int j = 0; j < 7; j++)
 	{
 		//check player 1
-		if (currentGame.gameBoard[0][j] == 1 && currentGame.gameBoard[1][j] == 1 && currentGame.gameBoard[2][j] == 1 && currentGame.gameBoard[3][j] == 1)
+		inlineCounter = 0;
+		for (int i = 0; i < 6; i++)
 		{
-			currentGame.player1Score++;
+			if (currentGame.gameBoard[i][j] == 1)
+			{
+				inlineCounter++;
+				if (inlineCounter >= 4)
+				{
+					inlineCounter = 0;
+					currentGame.player1Score++;
+					break;
+				}
+			}
+			else
+			{
+				inlineCounter = 0;
+			}
 		}
-		if (currentGame.gameBoard[1][j] == 1 && currentGame.gameBoard[2][j] == 1 && currentGame.gameBoard[3][j] == 1 && currentGame.gameBoard[4][j] == 1)
+
+		// 	//check player 2
+		inlineCounter = 0;
+		for (int i = 0; i < 6; i++)
 		{
-			currentGame.player1Score++;
-		}
-		if (currentGame.gameBoard[2][j] == 1 && currentGame.gameBoard[3][j] == 1 && currentGame.gameBoard[4][j] == 1 && currentGame.gameBoard[5][j] == 1)
-		{
-			currentGame.player1Score++;
-		}
-		//check player 2
-		if (currentGame.gameBoard[0][j] == 2 && currentGame.gameBoard[1][j] == 2 && currentGame.gameBoard[2][j] == 2 && currentGame.gameBoard[3][j] == 2)
-		{
-			currentGame.player2Score++;
-		}
-		if (currentGame.gameBoard[1][j] == 2 && currentGame.gameBoard[2][j] == 2 && currentGame.gameBoard[3][j] == 2 && currentGame.gameBoard[4][j] == 2)
-		{
-			currentGame.player2Score++;
-		}
-		if (currentGame.gameBoard[2][j] == 2 && currentGame.gameBoard[3][j] == 2 && currentGame.gameBoard[4][j] == 2 && currentGame.gameBoard[5][j] == 2)
-		{
-			currentGame.player2Score++;
+			if (currentGame.gameBoard[i][j] == 2)
+			{
+				inlineCounter++;
+				if (inlineCounter >= 4)
+				{
+					inlineCounter = 0;
+					currentGame.player2Score++;
+					break;
+				}
+			}
+			else
+			{
+				inlineCounter = 0;
+			}
 		}
 	}
 
 	//check diagonally
 
 	//check player 1
-	if (currentGame.gameBoard[2][0] == 1 && currentGame.gameBoard[3][1] == 1 && currentGame.gameBoard[4][2] == 1 && currentGame.gameBoard[5][3] == 1)
+	// Top left
+	for (int i = 0; i < 3; i++)
 	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[1][0] == 1 && currentGame.gameBoard[2][1] == 1 && currentGame.gameBoard[3][2] == 1 && currentGame.gameBoard[4][3] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[2][1] == 1 && currentGame.gameBoard[3][2] == 1 && currentGame.gameBoard[4][3] == 1 && currentGame.gameBoard[5][4] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[0][0] == 1 && currentGame.gameBoard[1][1] == 1 && currentGame.gameBoard[2][2] == 1 && currentGame.gameBoard[3][3] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[1][1] == 1 && currentGame.gameBoard[2][2] == 1 && currentGame.gameBoard[3][3] == 1 && currentGame.gameBoard[4][4] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[2][2] == 1 && currentGame.gameBoard[3][3] == 1 && currentGame.gameBoard[4][4] == 1 && currentGame.gameBoard[5][5] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[0][1] == 1 && currentGame.gameBoard[1][2] == 1 && currentGame.gameBoard[2][3] == 1 && currentGame.gameBoard[3][4] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[1][2] == 1 && currentGame.gameBoard[2][3] == 1 && currentGame.gameBoard[3][4] == 1 && currentGame.gameBoard[4][5] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[2][3] == 1 && currentGame.gameBoard[3][4] == 1 && currentGame.gameBoard[4][5] == 1 && currentGame.gameBoard[5][6] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[0][2] == 1 && currentGame.gameBoard[1][3] == 1 && currentGame.gameBoard[2][4] == 1 && currentGame.gameBoard[3][5] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[1][3] == 1 && currentGame.gameBoard[2][4] == 1 && currentGame.gameBoard[3][5] == 1 && currentGame.gameBoard[4][6] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[0][3] == 1 && currentGame.gameBoard[1][4] == 1 && currentGame.gameBoard[2][5] == 1 && currentGame.gameBoard[3][6] == 1)
-	{
-		currentGame.player1Score++;
+		for (int j = 0; j < 4; j++)
+		{
+			if (currentGame.gameBoard[i][j] == 1 && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 1][j + 1]) && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 2][j + 2]) && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 3][j + 3]))
+			{
+				currentGame.player1Score++;
+			}
+		}
 	}
 
-	if (currentGame.gameBoard[0][3] == 1 && currentGame.gameBoard[1][2] == 1 && currentGame.gameBoard[2][1] == 1 && currentGame.gameBoard[3][0] == 1)
+	// Top right
+	for (int i = 0; i < 3; i++)
 	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[0][4] == 1 && currentGame.gameBoard[1][3] == 1 && currentGame.gameBoard[2][2] == 1 && currentGame.gameBoard[3][1] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[1][3] == 1 && currentGame.gameBoard[2][2] == 1 && currentGame.gameBoard[3][1] == 1 && currentGame.gameBoard[4][0] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[0][5] == 1 && currentGame.gameBoard[1][4] == 1 && currentGame.gameBoard[2][3] == 1 && currentGame.gameBoard[3][2] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[1][4] == 1 && currentGame.gameBoard[2][3] == 1 && currentGame.gameBoard[3][2] == 1 && currentGame.gameBoard[4][1] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[2][3] == 1 && currentGame.gameBoard[3][2] == 1 && currentGame.gameBoard[4][1] == 1 && currentGame.gameBoard[5][0] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[0][6] == 1 && currentGame.gameBoard[1][5] == 1 && currentGame.gameBoard[2][4] == 1 && currentGame.gameBoard[3][3] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[1][5] == 1 && currentGame.gameBoard[2][4] == 1 && currentGame.gameBoard[3][3] == 1 && currentGame.gameBoard[4][2] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[2][4] == 1 && currentGame.gameBoard[3][3] == 1 && currentGame.gameBoard[4][2] == 1 && currentGame.gameBoard[5][1] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[1][6] == 1 && currentGame.gameBoard[2][5] == 1 && currentGame.gameBoard[3][4] == 1 && currentGame.gameBoard[4][3] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[2][5] == 1 && currentGame.gameBoard[3][4] == 1 && currentGame.gameBoard[4][3] == 1 && currentGame.gameBoard[5][2] == 1)
-	{
-		currentGame.player1Score++;
-	}
-	if (currentGame.gameBoard[2][6] == 1 && currentGame.gameBoard[3][5] == 1 && currentGame.gameBoard[4][4] == 1 && currentGame.gameBoard[5][3] == 1)
-	{
-		currentGame.player1Score++;
+		for (int j = 3; j < 7; j++)
+		{
+			if (currentGame.gameBoard[i][j] == 1 && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 1][j - 1]) && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 2][j - 2]) && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 3][j - 3]))
+			{
+				currentGame.player1Score++;
+			}
+		}
 	}
 
 	//check player 2
-	if (currentGame.gameBoard[2][0] == 2 && currentGame.gameBoard[3][1] == 2 && currentGame.gameBoard[4][2] == 2 && currentGame.gameBoard[5][3] == 2)
+	// Top Left
+	for (int i = 0; i < 3; i++)
 	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[1][0] == 2 && currentGame.gameBoard[2][1] == 2 && currentGame.gameBoard[3][2] == 2 && currentGame.gameBoard[4][3] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[2][1] == 2 && currentGame.gameBoard[3][2] == 2 && currentGame.gameBoard[4][3] == 2 && currentGame.gameBoard[5][4] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[0][0] == 2 && currentGame.gameBoard[1][1] == 2 && currentGame.gameBoard[2][2] == 2 && currentGame.gameBoard[3][3] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[1][1] == 2 && currentGame.gameBoard[2][2] == 2 && currentGame.gameBoard[3][3] == 2 && currentGame.gameBoard[4][4] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[2][2] == 2 && currentGame.gameBoard[3][3] == 2 && currentGame.gameBoard[4][4] == 2 && currentGame.gameBoard[5][5] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[0][1] == 2 && currentGame.gameBoard[1][2] == 2 && currentGame.gameBoard[2][3] == 2 && currentGame.gameBoard[3][4] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[1][2] == 2 && currentGame.gameBoard[2][3] == 2 && currentGame.gameBoard[3][4] == 2 && currentGame.gameBoard[4][5] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[2][3] == 2 && currentGame.gameBoard[3][4] == 2 && currentGame.gameBoard[4][5] == 2 && currentGame.gameBoard[5][6] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[0][2] == 2 && currentGame.gameBoard[1][3] == 2 && currentGame.gameBoard[2][4] == 2 && currentGame.gameBoard[3][5] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[1][3] == 2 && currentGame.gameBoard[2][4] == 2 && currentGame.gameBoard[3][5] == 2 && currentGame.gameBoard[4][6] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[0][3] == 2 && currentGame.gameBoard[1][4] == 2 && currentGame.gameBoard[2][5] == 2 && currentGame.gameBoard[3][6] == 2)
-	{
-		currentGame.player2Score++;
+		for (int j = 0; j < 5; j++)
+		{
+			if (currentGame.gameBoard[i][j] == 2 && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 1][j + 1]) && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 2][j + 2]) && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 3][j + 3]))
+			{
+				currentGame.player2Score++;
+			}
+		}
 	}
 
-	if (currentGame.gameBoard[0][3] == 2 && currentGame.gameBoard[1][2] == 2 && currentGame.gameBoard[2][1] == 2 && currentGame.gameBoard[3][0] == 2)
+	// Top right
+	for (int i = 0; i < 3; i++)
 	{
-		currentGame.player2Score++;
+		for (int j = 3; j < 7; j++)
+		{
+			if (currentGame.gameBoard[i][j] == 2 && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 1][j - 1]) && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 2][j - 2]) && (currentGame.gameBoard[i][j] == currentGame.gameBoard[i + 3][j - 3]))
+			{
+				currentGame.player2Score++;
+			}
+		}
 	}
-	if (currentGame.gameBoard[0][4] == 2 && currentGame.gameBoard[1][3] == 2 && currentGame.gameBoard[2][2] == 2 && currentGame.gameBoard[3][1] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[1][3] == 2 && currentGame.gameBoard[2][2] == 2 && currentGame.gameBoard[3][1] == 2 && currentGame.gameBoard[4][0] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[0][5] == 2 && currentGame.gameBoard[1][4] == 2 && currentGame.gameBoard[2][3] == 2 && currentGame.gameBoard[3][2] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[1][4] == 2 && currentGame.gameBoard[2][3] == 2 && currentGame.gameBoard[3][2] == 2 && currentGame.gameBoard[4][1] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[2][3] == 2 && currentGame.gameBoard[3][2] == 2 && currentGame.gameBoard[4][1] == 2 && currentGame.gameBoard[5][0] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[0][6] == 2 && currentGame.gameBoard[1][5] == 2 && currentGame.gameBoard[2][4] == 2 && currentGame.gameBoard[3][3] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[1][5] == 2 && currentGame.gameBoard[2][4] == 2 && currentGame.gameBoard[3][3] == 2 && currentGame.gameBoard[4][2] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[2][4] == 2 && currentGame.gameBoard[3][3] == 2 && currentGame.gameBoard[4][2] == 2 && currentGame.gameBoard[5][1] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[1][6] == 2 && currentGame.gameBoard[2][5] == 2 && currentGame.gameBoard[3][4] == 2 && currentGame.gameBoard[4][3] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[2][5] == 2 && currentGame.gameBoard[3][4] == 2 && currentGame.gameBoard[4][3] == 2 && currentGame.gameBoard[5][2] == 2)
-	{
-		currentGame.player2Score++;
-	}
-	if (currentGame.gameBoard[2][6] == 2 && currentGame.gameBoard[3][5] == 2 && currentGame.gameBoard[4][4] == 2 && currentGame.gameBoard[5][3] == 2)
-	{
-		currentGame.player2Score++;
-	}
+	// cout << "Count ran .." << endl;
 }
 
 void saveFile(char *file, gameStatus &currentGame)
@@ -717,8 +542,9 @@ int main(int argc, char **argv)
 		currentGame.currentTurn = current - 48;
 		fclose(currentGame.gameFile);
 	}
-
+	cout << "Stuff" << endl;
 	printGameBoard(currentGame);
+	cout << "Printed" << endl;
 	countScore(currentGame);
 	printf("Score: Player 1 = %d, Player 2 = %d\n\n", currentGame.player1Score, currentGame.player2Score);
 
@@ -800,6 +626,7 @@ int main(int argc, char **argv)
 
 	printf("game state after move:\n");
 	printGameBoard(currentGame);
+	cout << "Printed" << endl;
 	countScore(currentGame);
 	printf("Score: Player 1 = %d, Player 2 = %d\n\n", currentGame.player1Score, currentGame.player2Score);
 
