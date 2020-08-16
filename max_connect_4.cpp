@@ -242,7 +242,7 @@ void aiPlay(gameStatus &currentGame)
 	int column = -1;
 	for (int i = 0; i < 7; i++)
 	{
-		cout << "////////////////" << endl;
+		// cout << "////////////////" << endl;
 		currentGame.currentTurn = AI_PIECE;
 		int result = playPiece(i, currentGame);
 		if (result == 0)
@@ -250,7 +250,7 @@ void aiPlay(gameStatus &currentGame)
 			continue;
 		}
 		int score = minimax(false, maxDepth, -INFINITY, INFINITY, currentGame);
-		cout << "Score " << score << endl;
+		// cout << "Score " << score << endl;
 		undoPiece(i, currentGame);
 		// Determin which one to check based on which player AI is;
 		// int score = currentGame.player1Score;
@@ -542,9 +542,9 @@ int main(int argc, char **argv)
 		currentGame.currentTurn = current - 48;
 		fclose(currentGame.gameFile);
 	}
-	cout << "Stuff" << endl;
+	// cout << "Stuff" << endl;
 	printGameBoard(currentGame);
-	cout << "Printed" << endl;
+	// cout << "Printed" << endl;
 	countScore(currentGame);
 	printf("Score: Player 1 = %d, Player 2 = %d\n\n", currentGame.player1Score, currentGame.player2Score);
 
@@ -561,10 +561,19 @@ int main(int argc, char **argv)
 	}
 	if (strcmp(game_mode, "one-move") == 0)
 	{
-		cout << "agaseg " << endl;
 		AI_PIECE = currentGame.currentTurn;
-		cout << AI_PIECE << "....." << endl;
+		// cout << AI_PIECE << "....." << endl;
 		aiPlay(currentGame);
+		currentGame.gameFile = fopen(output, "w");
+		if (currentGame.gameFile != 0)
+		{
+			printGameBoardToFile(currentGame);
+			fclose(currentGame.gameFile);
+		}
+		else
+		{
+			printf("error: could not open output file %s\n", output);
+		}
 	}
 	else if (strcmp(game_mode, "interactive") == 0)
 	{
@@ -630,15 +639,5 @@ int main(int argc, char **argv)
 	countScore(currentGame);
 	printf("Score: Player 1 = %d, Player 2 = %d\n\n", currentGame.player1Score, currentGame.player2Score);
 
-	currentGame.gameFile = fopen(output, "w");
-	if (currentGame.gameFile != 0)
-	{
-		printGameBoardToFile(currentGame);
-		fclose(currentGame.gameFile);
-	}
-	else
-	{
-		printf("error: could not open output file %s\n", output);
-	}
 	return 1;
 }
